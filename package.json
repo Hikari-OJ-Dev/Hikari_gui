@@ -1,0 +1,29 @@
+{
+  "name": "hikari_gui",
+  "version": "1.0.0",
+  "description": "Hikari_gui",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "author": "UnderStarlight & RealClearwave",
+  "license": "MIT",
+  "devDependencies": {
+    "@electron-forge/cli": "^7.2.0",
+    "@electron-forge/maker-zip": "^7.2.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.2.0",
+    "codemirror": "^6.0.1",
+    "electron": "^28.2.1"
+  },
+  "dependencies": {
+    "@electron-forge/maker-deb": "^7.2.0",
+    "@electron-forge/maker-rpm": "^7.2.0",
+    "@electron-forge/maker-squirrel": "^7.2.0",
+    "@electron/asar": "^3.2.8",
+    "electron-squirrel-startup": "^1.0.0",
+    "npm-check": "^6.0.1"
+  }
+}

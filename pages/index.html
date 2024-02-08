@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Rest of the code -->
+  </head>
+  <body>
+    <!-- Rest of the code -->
+  </body>
+</html>
+<html>
+  <script>
+    function connectServer() {
+      str = document.getElementById("server").value;
+      if (document.getElementById("server").value === "")
+        str = document.getElementById("server").placeholder;
+      window.electronAPI.loadURL(str);
+    }
+  </script>
+  <head>
+    <!-- Remove the unnecessary 'charset' meta element -->
+    <!-- <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    /> -->
+    <title>HIKARI OJ</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      label {
+        margin-top: 10px;
+        display: block;
+        color: #666;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        box-sizing: border-box; /* Ensures padding doesn't affect overall width */
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>开始HIKARI OJ之旅</h1>
+      <div>
+        <label for="server">服务器地址:</label>
+        <input
+          type="text"
+          id="server"
+          placeholder="http://124.220.133.192:1243/"
+        />
+      </div>
+      <!-- <div>
+        <label for="username">用户名:</label>
+        <input type="text" id="username" placeholder="" />
+      </div>
+      <div>
+        <label for="userpasswd">密码:</label>
+        <input type="text" id="userpasswd" placeholder="" />
+      </div> -->
+      <button id="connect" onclick="connectServer()">连接</button>
+    </div>
+  </body>
+</html>
