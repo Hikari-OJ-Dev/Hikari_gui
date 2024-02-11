@@ -1,8 +1,13 @@
-import os, json, time, subprocess, requests
-import sys
+import os, json, time, subprocess, requests, hashlib, sys
 
+#做3次MD5
+def md5_3(x):
+    x1 = hashlib.md5(x.encode()).hexdigest()
+    x2 = hashlib.md5(x1.encode()).hexdigest()
+    x3 = hashlib.md5(x2.encode()).hexdigest()
+    return x3
 
-def judgePts(execPath,inData,outData,timeLimit,memLimit):
+def judgePts(execPath,inData,timeLimit,memLimit):
     #测试
     obj = subprocess.Popen([execPath],shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
@@ -10,25 +15,23 @@ def judgePts(execPath,inData,outData,timeLimit,memLimit):
         output,err = obj.communicate(timeout = timeLimit)
     except subprocess.TimeoutExpired:
         obj.kill()
-        return {'status':'TLE','out':'(Time Limit Exceeded.)','ans':outData}
+        return {'status':'TLE','out':'(Time Limit Exceeded.)'}
     
     if err:
-        return {'status':'RE','out':err,'ans':outData}
+        return {'status':'RE','out':err}
         
-    #比对程序输出
-    if (((output.decode('utf-8')).replace('\n','')).replace(' ','')).strip() == (((outData).replace('\n','')).replace(' ','')).strip(): #去除回车和空格
-        return {'status':'AC','out':output.decode('utf-8'),'ans':outData}
-    else:
-        return {'status':'WA','out':output.decode('utf-8'),'ans':outData}
+    #输出
+    #if (((output.decode('utf-8')).replace('\n','')).replace(' ','')).strip() == (((outData).replace('\n','')).replace(' ','')).strip(): #去除回车和空格
+    return {'status':'OK','out':output.decode('utf-8')}
 
 def judge(data,code,language ='cpp'):
     try:
         os.mkdir('Temp')
     except Exception as e:
-        print("[Warning] Temp Folder Create Failed:",e)
+        #print("[Warning] Temp Folder Create Failed:",e)
+        pass
 
-    resultDict = {'status':'AC'}
-    score = 0;pts = 0
+    resultDict = {'status':'OK'}
 
     runID = str(time.time()) # 测试ID
     sourcePath ='Temp\\' + runID + '.' + language #源文件路径
@@ -51,15 +54,13 @@ def judge(data,code,language ='cpp'):
     
     #找不到编译出的可执行文件，就报Compile Error
     if not os.path.exists(execPath):
-        return {'status':'CE','log':compileLog,'pts':0,'score':0}
+        return {'status':'CE','log':compileLog}
     else: resultDict['log'] = compileLog
 
     #逐点测试
     for i in data['data'].keys():
-        resultDict[i] = judgePts(execPath,data['data'][i]['in'],data['data'][i]['out'],data['time_limit'],data['mem_limit'])
-        score += data['data'][i]['score'] if resultDict[i]['status'] == 'AC' else 0 #如果AC加上对应score
-        pts += 1 if resultDict[i]['status'] == 'AC' else 0
-        if resultDict['status'] == 'AC' and resultDict[i]['status'] != 'AC':
+        resultDict[i] = judgePts(execPath,data['data'][i]['in'],data['time_limit'],data['mem_limit'])
+        if resultDict['status'] == 'OK' and resultDict[i]['status'] != 'OK':
             resultDict['status'] = resultDict[i]['status']
 
     #删除临时文件
@@ -69,28 +70,12 @@ def judge(data,code,language ='cpp'):
         os.unlink(cplogPath)
         os.rmdir('Temp')
     except Exception as e:
-        print("[Warning] Unlink File Failed:",e)
+        #print("[Warning] Unlink File Failed:",e)
+        pass
     
-    resultDict['score'] = score
-    resultDict['pts'] = pts
     return resultDict    
 
 """
-Usage:
-
-with open("./1000.json",'r') as f:
-        print(judge(json.loads(f.read()),'''
-              #include <bits/stdc++.h>
-              using namespace std;
-              
-              int main(){
-                int a,b;
-                cin>>a>>b;
-                cout<<a+b;
-                return 0;
-              }
-              ''','cpp'))
-
 Json Example:
 {
     "pid":1000,
@@ -106,14 +91,43 @@ Json Example:
 
 def judgeWithURL(dataURL,code,language='cpp'):
     try:
-        jsonData = requests.get(dataURL)
-        return judge(jsonData.json(),code,language)
+        jsonData = (requests.get(dataURL)).json()
+        #print(jsonData)
+        if jsonData['data_cnt'] == 0:
+            print ({'status':'Bad PID.'})
+            exit(0)
+
+        return judge(jsonData,code,language)
     except Exception as e:
         print (e)
         return {'status':'UKE','log':str(e)}
 
-#                                      OJ网址          UID 密码MD5*3  题号 测试文件
-#传参方式：python hikari-cli.py "http://127.0.0.1:1919"  1   123456 1000 test.cpp
+#全流程测试
+def judgeFlow(ojURL,uid,passwd,pid,code):
+    dataURL = f'{ojURL}/data/{pid}'
+    result = judgeWithURL(dataURL,code,'cpp')
+    #print(result)
+    #上传结果
+    try:
+        postURL = f'{ojURL}/post_result'
+        resultDict = { 
+            'uid': uid,
+            'passwd': md5_3(passwd),
+            'pid': pid,
+            'code': code,
+            'result': json.dumps(result)
+        }
+        res = (requests.post(url=postURL,data={'data':json.dumps(resultDict)})).json()
+        if res['status'] == 404:
+            res["upload_failure"] = True
+            
+        print(res)
+
+    except Exception as e:
+        print("Upload Result Failed.\n Exception:",str(e))
+
+#                                      OJ网址           UID 密码明文 题号  测试文件
+#传参方式：python hikari-cli.py "http://127.0.0.1:1919"  2   123456  1000 test.cpp 
 if __name__ == '__main__':
     result = ''
     try:
@@ -121,24 +135,8 @@ if __name__ == '__main__':
         code = ''
         with open(sys.argv[5],'r') as f:
             code = f.read()
-
-        dataURL = f'{sys.argv[1]}/data/{sys.argv[4]}'
-        result = judgeWithURL(dataURL,code,'cpp')
-        print(result)
-
-        #上传结果
-        try:
-            postURL = f'{sys.argv[1]}/post_result'
-            resultDict = { 
-                'uid': sys.argv[2],
-                'passwd': sys.argv[3],
-               'pid': sys.argv[4],
-               'code': code,
-                'result': json.dumps(result)
-            }
-            requests.post(url=postURL,data={'data':json.dumps(resultDict)})
-        except Exception as e:
-            print("Upload Result Failed.\n Exception:",str(e))
+        
+        judgeFlow(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],code)
     except Exception as e:
         print("Judge Failed.\n Exception:",str(e))
 

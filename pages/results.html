@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>提交结果</title>
+    <link rel="stylesheet" type="text/css" href="../css/results.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2 id="head">Submission Result</h2>
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th>Test Case</th>
+            <th>Status</th>
+            <th>Output</th>
+            <th>Expected Answer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- JavaScript will dynamically insert rows here -->
+        </tbody>
+      </table>
+      <p><strong>Overall Status:</strong> <span id="overallStatus"></span></p>
+      <p><strong>Score:</strong> <span id="score"></span></p>
+      <p><strong>Points:</strong> <span id="points"></span></p>
+      <p><strong>Logs:</strong> <span id="logs"></span></p>
+    </div>
+    <button id="goBackButton">Go Back</button>
+    <script src="../js/results.js"></script>
+  </body>
+</html>

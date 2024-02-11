@@ -1,0 +1,107 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  height: 95vh; /* 使容器充满整个视口高度 */
+}
+
+.left-panel {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 确保内容垂直居中 */
+  padding: 20px;
+}
+
+.left-panel label,
+.left-panel input,
+.left-panel select {
+  margin-bottom: 10px; /* 为所有元素添加统一的底部外边距 */
+  width: 100%; /* 确保宽度统一 */
+  padding: 8px; /* 添加一些内边距使得输入框更加易于点击 */
+  border-radius: 4px; /* 统一边框圆角样式 */
+}
+
+.left-panel input,
+.left-panel select {
+  border: 1px solid #ccc; /* 统一边框样式 */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* 内阴影效果 */
+}
+
+.left-panel label {
+  display: block; /* 使标签独占一行 */
+  margin-bottom: 5px; /* 调整标签的底部外边距 */
+  font-weight: bold; /* 加粗字体 */
+}
+
+select {
+  cursor: pointer; /* 改善下拉框的点击体验 */
+  background-color: #ffffff; /* 背景色 */
+}
+
+/* 调整右侧面板的样式以保持整体美观 */
+.right-panel {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: start; /* 保持文本框和按钮靠顶部 */
+}
+
+.right-panel textarea {
+  flex-grow: 1;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.95); /* 点击时的动画效果 */
+}
+.left-panel button {
+  /*居中*/
+  margin: 0 auto;
+  width: 40%;
+}
+/* 添加一些背景和颜色美化 */
+body {
+  background-color: #f8f9fa;
+}
+
+input,
+textarea {
+  background-color: #ffffff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+.CodeMirror * {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12pt;
+  height: auto;
+}
+.CodeMirror-scroll {
+  height: auto;
+}
+#status {
+  text-align: center;
+  margin-top: 20px;
+  font-weight: bold;
+  display: none;
+}

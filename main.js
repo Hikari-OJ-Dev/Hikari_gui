@@ -1,18 +1,40 @@
-const { app, BrowserWindow, Menu, dialog } = require("electron");
+const { app, BrowserWindow, Menu, dialog, ipcRenderer } = require("electron");
 const { ipcMain } = require("electron");
 const path = require("path");
-const { exec } = require("child_process");
-
-MainTemplate = [
+const { exec, execSync } = require("child_process");
+fs = require("fs");
+MainTemplate  = [
   {
-    label: "文件",
+    label: "导航",
     submenu: [
       {
-        label: "打开",
-        accelerator: "Ctrl+O",
+        label: "主页",
+        accelerator: "CmdOrCtrl+H",
         click() {
-          console.log("open");
+          win.loadURL(ServerURL);
         },
+      },
+      {
+        type: "separator",
+      },
+      {
+        label: "后退",
+        accelerator: "Alt+Left",
+        click() {
+          win.webContents.goBack();
+        },
+      },
+      {
+        label: "前进",
+        accelerator: "Alt+Right",
+        click() {
+          win.webContents.goForward();
+        },
+      },
+      {
+        label: "退出",
+        accelerator: "CmdOrCtrl+Q",
+        role: "quit",
       },
     ],
   },
@@ -58,8 +80,15 @@ MainTemplate = [
     label: "提交",
     submenu: [
       {
+        label: "提交文件",
+        accelerator: "CmdOrCtrl+Shift+S",
+        click: function () {
+          win.loadFile("pages/submit.html");
+        },
+      },
+      {
         label: "提交代码",
-        accelerator: "Ctrl+S",
+        accelerator: "CmdOrCtrl+S",
         click: function () {
           win.loadFile("pages/submit.html");
         },
@@ -181,7 +210,7 @@ ipcMain.on("load-url", (event, arg) => {
 
 ipcMain.on("check-gcc", (event, arg) => {
   console.log("Check gcc...");
-  exec(`Compilers\\bin\\gcc --version`, (error, stdout, stderr) => {
+  exec(`Compilers\\Mingw64\\bin\\gcc --version`, (error, stdout, stderr) => {
     //console.log(error, stdout, stderr);
     if (error) {
       event.returnValue = "error";
@@ -197,7 +226,7 @@ ipcMain.on("check-gcc", (event, arg) => {
 });
 ipcMain.on("check-gpp", (event, arg) => {
   console.log("Check g++...");
-  exec(`Compilers\\bin\\g++ --version`, (error, stdout, stderr) => {
+  exec(`Compilers\\Mingw64\\bin\\g++ --version`, (error, stdout, stderr) => {
     //console.log(error, stdout, stderr);
     if (error) {
       event.returnValue = "error";
@@ -234,5 +263,56 @@ ipcMain.on("load-server", (event, arg) => {
 });
 ipcMain.on("back", (event, arg) => {
   win.loadFile("pages/index.html");
+  event.returnValue = 0;
+});
+ipcMain.on("back-main", (event, arg) => {
+  win.loadURL(ServerURL);
+  event.returnValue = 0;
+});
+ipcMain.on("submit", (event, arg) => {
+  data = arg;
+  uid = String(data.uid);
+  passwd = String(data.password);
+  pid = String(data.pid);
+  lang = String(data.lang);
+  code = String(data.code);
+  //将code写入文件
+  path_f = "temp/" + uid + "_" + pid + ".cpp";
+  fs.writeFileSync(path_f, code, (err) => {
+    if (err) {
+      console.log(err);
+      event.returnValue = 1;
+    }
+  });
+  upload_url = ServerURL;
+  upload_url = upload_url.replace("1243", "1919");
+  try {
+    const stdout = execSync(
+      `python hikari-cli.py "${upload_url}" ${uid} ${passwd} ${pid} ${path_f}`
+    );
+    // stdout = {
+    //   status: "AC",
+    //   log: "",
+    //   1: { status: "AC", out: "2\r\n", ans: "2" },
+    //   2: { status: "AC", out: "5\r\n", ans: "5" },
+    //   score: 100,
+    //   pts: 2,
+    // };
+    jsonD = JSON.parse(stdout.toString().replace(/'/g, '"'));
+    console.log(jsonD);
+    jsonD.pid = pid;
+    win.loadFile("pages/results.html");
+    win.webContents.on("did-finish-load", () => {
+      win.webContents.send("results", jsonD);
+    });
+    console.log("Submit Success");
+    event.returnValue = jsonD;
+  } catch (error) {
+    console.log("Submit Error");
+    console.log(error);
+    dialog.showErrorBox("提交失败", "请检查网络连接或者服务器是否正常运行");
+
+    event.returnValue = 1;
+  }
   event.returnValue = 0;
 });
