@@ -1,12 +1,23 @@
 document.getElementById("logs").textContent = "";
 // Example JSON data
-jsonData = [];
-window.electronAPI.onMessage("results", (event, data) => {
-  jsonData = data;
-  console.log("Success", jsonData);
-  displayResults(jsonData);
-});
-
+// window.electronAPI.onMessage("results", (event, data) => {
+//   jsonData = data;
+//   console.log("Success", jsonData);
+//   displayResults(jsonData);
+// });
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+async function pauseExecution(ms) {
+  await delay(ms); // 暂停3秒
+}
+async function getResults() {
+  await pauseExecution(500);
+  const res = await pywebview.api.getRes();
+  console.log("res", res);
+  displayResults(JSON.parse(res));
+}
+getResults();
 function displayResults(data) {
   pid = data.pid;
   document.getElementById(
@@ -48,4 +59,3 @@ document.getElementById("goBackButton").onclick = function () {
   window.history.back(); // This will take the user back to the previous page
 };
 // Call displayResults with the example JSON data
-displayResults(jsonData);

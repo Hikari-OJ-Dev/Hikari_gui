@@ -128,3 +128,8 @@ dist
 
 Compilers
 temp
+build
+venv
+*.exe
+.idea
+.vscode
