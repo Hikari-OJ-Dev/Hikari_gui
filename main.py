@@ -133,7 +133,7 @@ def about():
 if __name__ == '__main__':
     api = Hikari()
     win = webview.create_window(
-        title='HIKARI OJ', url='pages/index.html', js_api=api)
+        title='HIKARI OJ', url='pages/index.html', js_api=api, text_select = True)
     menu_items = [
         wm.Menu(
             '导航',
